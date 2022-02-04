@@ -7,7 +7,7 @@ Code for paper *Fitting Generalized Linear Mixed Models Using Adaptive Quadratur
   - **02_weibull_survival_laplace.cpp**
 3. ...
 
-All data and packages are downloaded, installed, and loaded within each script. On a "standard" machine (maybe not Windows?) you should be able to simply run the code in a fresh `R` session.
+All data and packages are downloaded, installed, and loaded within each script. On a "standard" machine (maybe not Windows?) you should be able to simply run the code in a fresh `R` session and the results from the paper should pop out. Obviously the absolute timings will not be the same, although the relative timings should be roughly the same, to the point that the narrative in the paper isn't affected.
 
 Version information for where the code was tested:
 
