@@ -23,12 +23,16 @@ globalpath <- "~/work/projects/num-quadpoints"
 tmbpath <- file.path(globalpath,"code")
 resultspath <- file.path(globalpath,"results")
 
-precompile()
-# compile(file.path(tmbpath,"02_weibull_survival.cpp"))
-dyn.load(dynlib(file.path(tmbpath,"02_weibull_survival")))
-# compile(file.path(tmbpath,"02_weibull_survival_laplace.cpp"))
-dyn.load(dynlib(file.path(tmbpath,"02_weibull_survival_laplace")))
+download.file("https://raw.githubusercontent.com/awstringer1/glmm-aq-paper-code/main/02_weibull_survival.cpp?token=GHSAT0AAAAAABRIFR6I577P4YSAV5LZWMIMYQGW3AA",
+              file.path(tmbpath,"02_weibull_survival.cpp"))
+download.file("https://raw.githubusercontent.com/awstringer1/glmm-aq-paper-code/main/02_weibull_survival_laplace.cpp?token=GHSAT0AAAAAABRIFR6J7I2HK6KQG7UW5FDQYQGW37Q",
+              file.path(tmbpath,"02_weibull_survival_laplace.cpp"))
 
+precompile()
+compile(file.path(tmbpath,"02_weibull_survival.cpp"))
+dyn.load(dynlib(file.path(tmbpath,"02_weibull_survival")))
+compile(file.path(tmbpath,"02_weibull_survival_laplace.cpp"))
+dyn.load(dynlib(file.path(tmbpath,"02_weibull_survival_laplace")))
 
 # Data. Object kidney becomes available in the global environment when you load
 # the survival package, but data(kidney,package = "survival") fails.
@@ -111,31 +115,6 @@ loglik_gr_parallel <- function(params,k) {
   }
   numDeriv::grad(loglik_parallel,params,k=k)
 }
-
-## TEST ##
-
-tm <- Sys.time()
-k <- 7
-pp <- rep(0,8)
-fn <- function(p) -1*loglik_parallel(p,k)
-gr <- function(p) -1*loglik_gr_parallel(p,k)
-he <- function(p) as(numDeriv::jacobian(gr,p),'dgCMatrix')
-opt <- optim(pp,fn,gr,method="L-BFGS-B",lower=-5,upper=2,hessian=TRUE)
-# opt <- trustOptim::trust.optim(pp,fn,gr,hs=he,method="Sparse")
-tm2 <- Sys.time()
-difftime(tm2,tm,units='secs')
-
-optest <- with(opt,c(par[1:5],exp(par[6:7]),exp(-par[8])))
-optse <- with(opt,sqrt(diag(solve(hessian))))
-optcilower <- with(opt,c(par[1:5]-2*optse[1:5],exp(par[6:7] - 2*optse[6:7]),exp(-1*(par[8] + 2*optse[8]))))
-optciupper <- with(opt,c(par[1:5]-2*optse[1:5],exp(par[6:7] +2*optse[6:7]),exp(-1*(par[8] - 2*optse[8]))))
-testresults <- as.data.frame(cbind(optcilower,optest,optciupper))
-rownames(testresults) <- c(paste0('beta',1:5),'mu','alpha','sigmasq')
-testresults
-
-## END TEST ##
-
-# Broadly comparable.
 # Function to fit the model and compute table of estimates for a given k
 
 fit_model <- function(k) {
@@ -176,7 +155,7 @@ knitr::kable(tabpaper[ ,c('k',
              'optest_sigmasq','optcilower_sigmasq','optciupper_sigmasq')],
              digits = 3,
              format = 'latex')
-
+cat("Done. Check",globalpath,"for the results.\n")
 
 
 
