@@ -35,7 +35,7 @@ get_summaries <- function(modlist) {
                      'betaT_est','betaT_sd',
                      'betaxT_est','betaxT_sd',
                      'sigma_est',
-                     'time',
+                     'time','numiter',
                      'cilowerint','ciupperint')
 
   out <- matrix(0,nrow=length(modlist$k),ncol=length(namestoreturn))
@@ -80,6 +80,7 @@ get_summaries <- function(modlist) {
     
     opt <- mod@optinfo
     sigmaest <- opt$val[1]
+    numiter <- opt$feval
     
     # Confidence intervals
     cc <- tryCatch(confint(mod,2,method='Wald'),error = function(e) e)
@@ -98,6 +99,7 @@ get_summaries <- function(modlist) {
       betaxT,
       sigmaest,
       times[j],
+      numiter,
       as.numeric(cc)
     ))
   }
@@ -219,10 +221,13 @@ simframe_witherror <- simframe %>%
     sigma_mse = quantile(sigma_error,.5),
     sigma_lower = quantile(sigma_error,.025),
     sigma_upper = quantile(sigma_error,.975),
-    int_covr = mean(int_covr)
+    int_covr = mean(int_covr),
+    meantime = mean(time),
+    sdtime = sd(time),
+    meaniter = mean(numiter),
+    sditer = sd(numiter)
   ) %>%
   mutate(
-    # k_rec = if_else(choosek(M,m) %% 2 == 0,choosek(M,m)+1,choosek(M,m)),
     k_rec = choosek(M,m),
     int_rmse = sqrt(int_mse),
     int_rmse_lower = sqrt(int_lower),
@@ -301,5 +306,15 @@ ggsave(filename = file.path(resultspath,"int-covr-M100-m5.pdf"),plot = covr_plot
 ggsave(filename = file.path(resultspath,"int-covr-M1000-m3.pdf"),plot = covr_plot(1000,3),width = 7,height = 7)
 ggsave(filename = file.path(resultspath,"int-covr-M1000-m5.pdf"),plot = covr_plot(1000,5),width = 7,height = 7)
 
-cat("Done plots. Check",resultspath,"for the results.\n")
+cat("Done plots. Doing time summary...\n")
+
+
+timetable <- simframe_witherror %>%
+  dplyr::select(M,m,sigma,k,contains('time'),contains('iter')) %>%
+  dplyr::filter(k%in%c(1,dplyr::case_when(choosek(M,m)%%2==0~choosek(M,m)+1,TRUE ~ choosek(M,m)))) # Only fit with odd k, so pick the next highest (slowest) one if k(M,m) even
+
+knitr::kable(timetable,digits=3) # Reformat in Latex, easier.
+
+
+cat("Done. Check",resultspath,"for the results.\n")
 

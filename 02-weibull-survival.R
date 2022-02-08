@@ -19,9 +19,12 @@ for (pkg in pkgs) {
 
 options(mc.cores = parallel::detectCores())
 
-globalpath <- "~/work/projects/num-quadpoints"
+globalpath <- tempdir()
 tmbpath <- file.path(globalpath,"code")
 resultspath <- file.path(globalpath,"results")
+if (!dir.exists(tmbpath)) dir.create(tmbpath)
+if (!dir.exists(resultspath)) dir.create(resultspath)
+
 
 download.file("https://raw.githubusercontent.com/awstringer1/glmm-aq-paper-code/main/02_weibull_survival.cpp?token=GHSAT0AAAAAABRIFR6I577P4YSAV5LZWMIMYQGW3AA",
               file.path(tmbpath,"02_weibull_survival.cpp"))
@@ -153,8 +156,9 @@ knitr::kable(tabpaper[ ,c('k',
              'optest_mu','optcilower_mu','optciupper_mu',
              'optest_alpha','optcilower_alpha','optciupper_alpha',
              'optest_sigmasq','optcilower_sigmasq','optciupper_sigmasq')],
-             digits = 3,
-             format = 'latex')
+             digits = 3)
+
+readr::write_csv(tabpaper,file = file.path(resultspath,"weibull-results.csv"))
 cat("Done. Check",globalpath,"for the results.\n")
 
 
