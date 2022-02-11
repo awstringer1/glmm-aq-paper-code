@@ -269,7 +269,7 @@ line_plot <- function(var,M,m,ylim) {
     scale_x_continuous(breaks = ktodo) +
     scale_linetype_manual(values = c("1" = "dashed","2" = "dotted","3" = "dotdash"),breaks = c("3","5","10")) + 
     coord_cartesian(ylim = ylim) +
-    labs(x = "",y = "") +
+    labs(x = "k",y = "Absolute error") +
     guides(linetype = 'none') +
     theme(text = element_text(size = PLOTTEXTSIZE))
   
@@ -286,7 +286,7 @@ covr_plot <- function(M,m) {
     geom_hline(yintercept = .95,linetype = 'dashed') +
     scale_x_continuous(breaks = ktodo) +
     coord_cartesian(ylim = c(0,1)) + 
-    labs(x = "",y = "") +
+    labs(x = "k",y = "Empirical coverage") +
     guides(linetype = 'none') +
     theme(text = element_text(size = PLOTTEXTSIZE))
 }
